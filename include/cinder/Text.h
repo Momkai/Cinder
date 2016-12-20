@@ -132,7 +132,7 @@ class TextLayout {
 	//! Returns the number of lines of text in the layout.
 	size_t	getLineCount() const { return mLines.size(); }
 	//! Returns a reference to the line of text. Assumes a valid line index.
-	const std::shared_ptr<Line> &getLine( size_t index ) const;
+	const std::shared_ptr<Line> &getLine( size_t index ) const { return mLines.at( index ); }
 
 	void	setFont( const Font &font );
 	//! Sets the currently active color. Implicit opqaue alpha.

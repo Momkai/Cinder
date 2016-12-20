@@ -316,11 +316,6 @@ void TextLayout::append( const string &str )
 		mLines.back()->addRun( Run( str, mCurrentFont, mCurrentColor ) );
 }
 
-const std::shared_ptr<Line>& TextLayout::getLine( size_t index ) const
-{
-	return mLines.at( index );
-}
-
 void TextLayout::setFont( const Font &font )
 {
 	mCurrentFont = font;

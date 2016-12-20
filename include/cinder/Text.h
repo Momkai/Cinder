@@ -68,6 +68,8 @@ class TextLayout {
 	//! Removes all lines of text from the layout.
 	void	clearLines() { mLines.clear(); }
 
+	//! Returns the number of lines of text in the layout.
+	size_t	getLineCount() const { return mLines.size(); }
 	//! Returns a reference to the line of text. Assumes a valid line index.
 	const std::shared_ptr<Line> &getLine( size_t index ) const;
 

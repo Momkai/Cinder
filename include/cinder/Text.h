@@ -40,6 +40,8 @@ struct __CTLine;
 
 namespace cinder {
 
+class Line;
+
 class TextLayout {
  public:
 	/*! \brief This is an abstract line
@@ -66,6 +68,9 @@ class TextLayout {
 	//! Removes all lines of text from the layout.
 	void	clearLines() { mLines.clear(); }
 
+	//! Returns a reference to the line of text. Assumes a valid line index.
+	const std::shared_ptr<Line> &getLine( size_t index ) const;
+
 	void	setFont( const Font &font );
 	//! Sets the currently active color. Implicit opqaue alpha.
 	void	setColor( const Color &color );
@@ -87,7 +92,7 @@ class TextLayout {
 	float	mCurrentLeadingOffset;
 	int		mHorizontalBorder, mVerticalBorder;
   
-	std::deque<std::shared_ptr<class Line> >		mLines;
+	std::deque<std::shared_ptr<Line> >	mLines;
 };
 
 class TextBox {

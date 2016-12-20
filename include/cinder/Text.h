@@ -28,6 +28,10 @@
 #include "cinder/Font.h"
 #include "cinder/Vector.h"
 
+#if defined( CINDER_MSW )
+#include "cinder/Unicode.h"
+#endif
+
 #include <vector>
 #include <deque>
 #include <string>
@@ -38,9 +42,66 @@ struct __CTFrame;
 struct __CTLine;
 #endif
 
-namespace cinder {
+// Windows forward declarations
+#if defined( CINDER_MSW )
+namespace Gdiplus {
+class Graphics;
+}
+#endif
 
-class Line;
+namespace { // anonymous namespace
+
+struct Run {
+	Run( const std::string &aText, const ci::Font &aFont, const ci::ColorA &aColor )
+		: mText( aText ), mFont( aFont ), mColor( aColor )
+	{
+#if defined( CINDER_MSW )
+		mWideText = ci::toUtf16( mText );
+#endif
+	}
+
+	std::string			mText;
+	ci::Font			mFont;
+	ci::ColorA			mColor;
+#if defined( CINDER_MSW )
+	std::u16string		mWideText;
+	// in GDI+ rendering we need to know each run's typographic metrics
+	float				mWidth;
+	float				mDescent, mLeading, mAscent;
+#endif
+};
+
+class Line {
+ public:
+	Line();
+	~Line();
+
+	void addRun( const Run &run ) { mRuns.push_back( run ); }
+
+	void calcExtents();
+#if defined( CINDER_COCOA )
+	void render( CGContextRef &cgContext, float currentY, float xBorder, float maxWidth );
+#elif defined( CINDER_MSW )
+	void render( Gdiplus::Graphics *graphics, float currentY, float xBorder, float maxWidth );
+#elif defined( CINDER_WINRT )
+	void render( Channel &channel, float currentY, float xBorder, float maxWidth );
+#endif
+
+	enum { LEFT, RIGHT, CENTERED };
+
+	std::vector<Run>	mRuns;
+	std::int8_t			mJustification;
+	float				mHeight, mWidth;
+	float				mLeadingOffset;
+	float				mDescent, mLeading, mAscent;
+#if defined( CINDER_COCOA )
+	CTLineRef			mCTLineRef;
+#endif
+};
+
+} // anonymous namespace
+
+namespace cinder {
 
 class TextLayout {
  public:

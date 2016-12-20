@@ -45,7 +45,6 @@
 	#include "cinder/msw/CinderMsw.h"
 	#include "cinder/msw/CinderMswGdiPlus.h"
 	#pragma comment(lib, "gdiplus")
-	#include "cinder/Unicode.h"
 
 static const float MAX_SIZE = 1000000.0f;
 
@@ -109,58 +108,12 @@ TextManager* TextManager::instance()
 	return TextManager::sInstance;
 }
 
-////////////////////////////////////////////////////////////////////////////////////////
-// Run
-struct Run {
-	Run( const string &aText, const Font &aFont, const ColorA &aColor )
-		: mText( aText ), mFont( aFont ), mColor( aColor )
-	{
-#if defined( CINDER_MSW )
-		mWideText = toUtf16( mText );
-#endif
-	}
+} // namespace cinder
 
-	string		mText;
-	Font		mFont;
-	ColorA		mColor;
-#if defined( CINDER_MSW )
-	std::u16string		mWideText;
-	// in GDI+ rendering we need to know each run's typographic metrics
-	float				mWidth;
-	float				mDescent, mLeading, mAscent;
-#endif
-};
+namespace { // anonymous namespace
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // Line
-class Line {
- public:
-	Line();
-	~Line();
-
-	void addRun( const Run &run ) { mRuns.push_back( run ); }
-
-	void calcExtents();
-#if defined( CINDER_COCOA )
-	void render( CGContextRef &cgContext, float currentY, float xBorder, float maxWidth );
-#elif defined( CINDER_MSW )
-	void render( Gdiplus::Graphics *graphics, float currentY, float xBorder, float maxWidth );
-#elif defined( CINDER_WINRT )
-	void render(Channel &channel, float currentY, float xBorder, float maxWidth);
-#endif
-
-	enum { LEFT, RIGHT, CENTERED };
-
-	vector<Run>			mRuns;
-	int8_t				mJustification;
-	float				mHeight, mWidth;
-	float				mLeadingOffset;
-	float				mDescent, mLeading, mAscent;
-#if defined( CINDER_COCOA )
-	CTLineRef			mCTLineRef;
-#endif
-};
-
 Line::Line()
 {
 #if defined( CINDER_COCOA )
@@ -210,13 +163,13 @@ void Line::calcExtents()
 		format.SetAlignment( Gdiplus::StringAlignmentNear ); format.SetLineAlignment( Gdiplus::StringAlignmentNear );
 		Gdiplus::RectF sizeRect;
 		const Gdiplus::Font *font = runIt->mFont.getGdiplusFont();
-		TextManager::instance()->getGraphics()->MeasureString( (wchar_t*)&runIt->mWideText[0], -1, font, Gdiplus::PointF( 0, 0 ), &format, &sizeRect );
-		
+		ci::TextManager::instance()->getGraphics()->MeasureString( (wchar_t*)&runIt->mWideText[0], -1, font, Gdiplus::PointF( 0, 0 ), &format, &sizeRect );
+
 		runIt->mWidth = sizeRect.Width;
 		runIt->mAscent = runIt->mFont.getAscent();
 		runIt->mDescent = runIt->mFont.getDescent();
 		runIt->mLeading = runIt->mFont.getLeading();
-		
+
 		mWidth += sizeRect.Width;
 		mAscent = std::max( runIt->mFont.getAscent(), mAscent );
 		mDescent = std::max( runIt->mFont.getDescent(), mDescent );
@@ -227,7 +180,7 @@ void Line::calcExtents()
 	mHeight = mWidth = mAscent = mDescent = mLeading = 0;
 	for( vector<Run>::iterator runIt = mRuns.begin(); runIt != mRuns.end(); ++runIt ) {
 		FT_Face face = runIt->mFont.getFreetypeFace();
-		
+
 		int width = 0;
 		for(string::iterator strIt = runIt->mText.begin(); strIt != runIt->mText.end(); ++strIt)
 		{
@@ -268,7 +221,7 @@ void Line::render( Gdiplus::Graphics *graphics, float currentY, float xBorder, f
 		currentX = maxWidth - mWidth - xBorder;
 	for( vector<Run>::const_iterator runIt = mRuns.begin(); runIt != mRuns.end(); ++runIt ) {
 		const Gdiplus::Font *font = runIt->mFont.getGdiplusFont();;
-		ColorA8u nativeColor( runIt->mColor );
+		ci::ColorA8u nativeColor( runIt->mColor );
 		Gdiplus::SolidBrush brush( Gdiplus::Color( nativeColor.a, nativeColor.r, nativeColor.g, nativeColor.b ) );
 		graphics->DrawString( (wchar_t*)&runIt->mWideText[0], -1, font, Gdiplus::PointF( currentX, currentY + (mAscent - runIt->mAscent) ), &brush );
 		currentX += runIt->mWidth;
@@ -299,6 +252,10 @@ void Line::render(Channel &channel, float currentY, float xBorder, float maxWidt
 }
 
 #endif
+
+} // anonymous namespace
+
+namespace cinder {
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // TextLayout

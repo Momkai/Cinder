@@ -63,6 +63,9 @@ class TextLayout {
 	//! Appends string \a str to the current line. Assumes UTF-8 encoding.
 	void	append( const std::string &str );
 
+	//! Removes all lines of text from the layout.
+	void	clearLines() { mLines.clear(); }
+
 	void	setFont( const Font &font );
 	//! Sets the currently active color. Implicit opqaue alpha.
 	void	setColor( const Color &color );

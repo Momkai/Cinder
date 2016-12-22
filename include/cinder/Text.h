@@ -59,6 +59,12 @@ struct Run {
 		mWideText = ci::toUtf16( mText );
 #endif
 	}
+#if defined( CINDER_MSW )
+	Run( const std::u16string &aText, const ci::Font &aFont, const ci::ColorA &aColor )
+		: mWideText( aText ), mFont( aFont ), mColor( aColor )
+	{
+	}
+#endif
 
 	std::string			mText;
 	ci::Font			mFont;
@@ -125,6 +131,17 @@ class TextLayout {
 	void	addRightLine( const std::string &line );
 	//! Appends string \a str to the current line. Assumes UTF-8 encoding.
 	void	append( const std::string &str );
+
+#if defined( CINDER_MSW )
+	//! Adds a left-justified line of text to the layout. Assumes UTF-16 encoding.
+	void	addLine( const std::u16string &line );
+	//! Adds a centered line of text to the layout. Assumes UTF-16 encoding.
+	void	addCenteredLine( const std::u16string &line );
+	//! Adds a right-justified line of text to the layout. Assumes UTF-16 encoding.
+	void	addRightLine( const std::u16string &line );
+	//! Appends string \a str to the current line. Assumes UTF-16 encoding.
+	void	append( const std::u16string &str );
+#endif
 
 	//! Removes all lines of text from the layout.
 	void	clearLines() { mLines.clear(); }

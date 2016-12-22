@@ -316,6 +316,43 @@ void TextLayout::append( const string &str )
 		mLines.back()->addRun( Run( str, mCurrentFont, mCurrentColor ) );
 }
 
+#if defined( CINDER_MSW )
+void TextLayout::addLine( const u16string &line )
+{
+	shared_ptr<Line> newLine( new Line() );
+	newLine->addRun( Run( line, mCurrentFont, mCurrentColor ) );
+	newLine->mJustification = Line::LEFT;
+	newLine->mLeadingOffset = mCurrentLeadingOffset;
+	mLines.push_back( newLine );
+}
+
+void TextLayout::addCenteredLine( const u16string &line )
+{
+	shared_ptr<Line> newLine( new Line() );
+	newLine->addRun( Run( line, mCurrentFont, mCurrentColor ) );
+	newLine->mJustification = Line::CENTERED;
+	newLine->mLeadingOffset = mCurrentLeadingOffset;
+	mLines.push_back( newLine );
+}
+
+void TextLayout::addRightLine( const u16string &line )
+{
+	shared_ptr<Line> newLine( new Line() );
+	newLine->addRun( Run( line, mCurrentFont, mCurrentColor ) );
+	newLine->mJustification = Line::RIGHT;
+	newLine->mLeadingOffset = mCurrentLeadingOffset;
+	mLines.push_back( newLine );
+}
+
+void TextLayout::append( const u16string &str )
+{
+	if( mLines.empty() )
+		addLine( str );
+	else
+		mLines.back()->addRun( Run( str, mCurrentFont, mCurrentColor ) );
+}
+#endif
+
 void TextLayout::setFont( const Font &font )
 {
 	mCurrentFont = font;

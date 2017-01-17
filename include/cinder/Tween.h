@@ -47,7 +47,7 @@ class Anim;
 template<typename T>
 T tweenLerp( const T &start, const T &end, float time )
 {
-	return start * ( 1 - time ) + end * time;
+	return static_cast<T>( start * ( 1 - time ) + end * time );
 }
 
 // Specialization of tweenLerp for Quaternions to use slerping
